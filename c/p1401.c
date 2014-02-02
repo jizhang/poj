@@ -1,20 +1,12 @@
 #include <stdio.h>
 
-int five(n) {
+int calc(int nn) {
     int f = 0;
-    while (n % 5 == 0) {
-        ++f;
-        n = n / 5;
+    while (nn) {
+        nn /= 5;
+        f += nn;
     }
     return f;
-}
-
-int calc(int nn) {
-    int i, z = 0;
-    for (i = 0; i < nn; ++i) {
-        z = z + five(i + 1);
-    }
-    return z;
 }
 
 int main() {
