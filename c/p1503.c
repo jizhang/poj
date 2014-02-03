@@ -14,61 +14,32 @@ static void revert(char *s) {
 
 }
 
-static void add(char s[200], char n[200]) {
-    int i, p, t;
-
-    p = 0;
+static void add(int s[200], char n[200]) {
+    int i, flag;
+    flag = 1;
     for (i = 0; i < 200; ++i) {
-        if (s[i] == '\0' && n[i] == '\0') {
-            if (p == 1) {
-                s[i] = '0' + 1;
-                s[i + 1] = '\0';
-            }
-            break;
-        } else if (s[i] == '\0' && n[i] != '\0') {
-            t = n[i] - '0';
-            if (p == 1) {
-                t += 1;
-                p = 0;
-            }
-            if (t > 9) {
-                s[i] = '0' + (t - 10);
-                p = 1;
+        if (flag == 1) {
+            if (n[i] != '\0') {
+                s[i] += n[i] - '0';
             } else {
-                s[i] = '0' + t;
+                flag = 0;
             }
-            s[i + 1] = '\0';
-        } else if (s[i] != '\0' && n[i] == '\0') {
-            t = s[i] - '0';
-            if (p == 1) {
-                t += 1;
-                p = 0;
-            }
-            if (t > 9) {
-                s[i] = '0' + (t - 10);
-                p = 1;
-            } else {
-                s[i] = '0' + t;
-            }
-        } else {
-            t = (s[i] - '0') + (n[i] - '0');
-            if (p == 1) {
-                t += 1;
-                p = 0;
-            }
-            if (t > 9) {
-                s[i] = '0' + (t - 10);
-                p = 1;
-            } else {
-                s[i] = '0' + t;
-            }
+        }
+        if (s[i] >= 10) {
+            s[i] -= 10;
+            s[i + 1] += 1;
         }
     }
 }
 
 int main() {
-    char n[200], s[200];
-    s[0] = '\0';
+    int s[200], i, flag;
+    char n[200];
+
+    for (i = 0; i < 200; ++i) {
+        s[i] = 0;
+    }
+
     while (1) {
         scanf("%s", n);
         if (strcmp(n, "0") == 0) {
@@ -78,7 +49,16 @@ int main() {
         revert(n);
         add(s, n);
     }
-    revert(s);
-    printf("%s\n", s);
+
+    flag = 1;
+    for (i = 199; i >= 0; --i) {
+        if (flag == 1 && s[i] == 0) {
+            continue;
+        }
+        flag = 0;
+        printf("%d", s[i]);
+    }
+
+    printf("\n", s);
     return 0;
 }
