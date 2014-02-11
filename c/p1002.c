@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #define MAXN 1000005
 #define MAXS 205
@@ -102,7 +101,7 @@ int main() {
 
     int n, i;
     char s[MAXS];
-    Node *root;
+    Node *root = NULL;
     
     scanf("%d", &n);
     for (i = 0; i < n; ++i) {
