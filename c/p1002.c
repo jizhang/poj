@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define MAXN 1000005
 #define MAXS 205
+
+typedef struct Node_ {
+    int number;
+    int count;
+    struct Node_ *left;
+    struct Node_ *right;
+} Node;
 
 int mapping[26] = {
     2, 2, 2, // A, B, C
@@ -15,8 +24,6 @@ int mapping[26] = {
     9, 9, 9, -1 // W, X, Y, Z
 };
 
-int number[MAXN], count[MAXN];
-
 int power(int a, int b) {
     int i, r = a;
     if (b == 0) {
@@ -28,11 +35,10 @@ int power(int a, int b) {
     return r;
 }
 
-void process(char s[MAXS]) {
-    int i, j, n, found;
+int parse_number(char s[MAXS]) {
 
-    n = 0;
-    j = 6;
+    int i, j = 6, n = 0;
+    
     for (i = 0; i < strlen(s); ++i) {    
         if (s[i] >= '0' && s[i] <= '9') {
             n += (s[i] - '0') * power(10, j--);
@@ -41,78 +47,74 @@ void process(char s[MAXS]) {
         }
     }
     
-    found = 0;
-    for (i = 0; i < MAXN; ++i) {
-    
-        if (count[i] == 0) {
-            break;
-        }
-        
-        if (number[i] == n) {
-            count[i] += 1;
-            found = 1;
-            break;
-        }
-    }
-    if (!found) {
-        number[i] = n;
-        count[i] = 1;
-    }
+    return n;
 }
 
-void output() {
-    int i, j, k, t, has;
-    
-    has = 0;
-    for (i = 0; i < MAXN; ++i) {
-    
-        if (count[i] == 0) {
+void increment_number(Node **root, int n) {
+
+    Node *node = *root, **p = root, **pn;
+
+    while (node != NULL) {
+        if (node->number == n) {
             break;
-        }
-        
-        for (j = i + 1; j < MAXN; ++j) {
-        
-            if (count[j] == 0) {
-                break;
-            }
-            
-            if (count[j] == 1) {
-                continue;
-            }
-            
-            if (number[i] > number[j]) {
-                t = number[i];
-                number[i] = number[j];
-                number[j] = t;
-                
-                t = count[i];
-                count[i] = count[j];
-                count[j] = t;
-            }
-        }
-        
-        if (count[i] > 1) {
-            printf("%03d-%04d %d\n", number[i] / 10000, number[i] % 10000, count[i]);
-            has = 1;
+        } else if (node->number > n) {
+            p = &node;
+            pn = &(node->left);
+            node = node->left;
+        } else {
+            p = &node;
+            pn = &(node->right);
+            node = node->right;
         }
     }
     
-    if (!has) {
-        printf("No duplicates.\n");
+    if (node != NULL) {
+        node->count += 1;
+    } else {
+        node = (Node *) malloc(sizeof(Node));
+        node->number = n;
+        node->count = 1;
+        node->left = NULL;
+        node->right = NULL;
+        
+        if (*p == NULL) {
+            *p = node;
+        } else {
+            *pn = node;
+        }
+        
     }
     
+}
+
+void print_numbers(Node *node, int *n) {
+    if (node != NULL) {
+        print_numbers(node->left, n);
+        if (node->count > 1) {
+            printf("%03d-%04d %d\n", node->number / 10000, node->number % 10000, node->count);
+            *n += 1;
+        }
+        print_numbers(node->right, n);
+    }
 }
 
 int main() {
 
     int n, i;
     char s[MAXS];
+    Node *root;
+    
     scanf("%d", &n);
     for (i = 0; i < n; ++i) {
         scanf("%s", s);
-        process(s);
+        increment_number(&root, parse_number(s));
     }
-    output();
+    
+    n = 0;
+    print_numbers(root, &n);
+    if (n == 0) {
+        printf("No duplicates.\n");
+    }
 
     return 0;
 }
