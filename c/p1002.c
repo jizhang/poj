@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define MAXN 1000005
+#define MAXS 205
+
 int mapping[26] = {
     2, 2, 2, // A, B, C
     3, 3, 3, // D, E, F
@@ -12,58 +15,62 @@ int mapping[26] = {
     9, 9, 9, -1 // W, X, Y, Z
 };
 
-int number[100000][7], count[100000];
+int number[MAXN], count[MAXN];
 
-void process(char s[100]) {
-    int i, j, n[7], found, equals;
+int power(int a, int b) {
+    int i, r = a;
+    if (b == 0) {
+        return 1;
+    }
+    for (i = 0; i < b - 1; ++i) {
+        r *= a;
+    }
+    return r;
+}
 
-    j = 0;
+void process(char s[MAXS]) {
+    int i, j, n, found;
+
+    n = 0;
+    j = 6;
     for (i = 0; i < strlen(s); ++i) {    
         if (s[i] >= '0' && s[i] <= '9') {
-            n[j++] = s[i] - '0';
+            n += (s[i] - '0') * power(10, j--);
         } else if (s[i] >= 'A' && s[i] <= 'Z') {
-            n[j++] = mapping[s[i] - 'A'];
+            n += mapping[s[i] - 'A'] * power(10, j--);
         }
     }
     
     found = 0;
-    for (i = 0; i < 100000; ++i) {
+    for (i = 0; i < MAXN; ++i) {
     
         if (count[i] == 0) {
             break;
         }
         
-        equals = 1;
-        for (j = 0; j < 7; ++j) {
-            if (number[i][j] != n[j]) {
-                equals = 0;
-                break;
-            }
-        }
-        if (equals) {
+        if (number[i] == n) {
             count[i] += 1;
             found = 1;
             break;
         }
     }
     if (!found) {
-        for (j = 0; j < 7; ++j) {
-            number[i][j] = n[j];
-        }
+        number[i] = n;
         count[i] = 1;
     }
 }
 
 void output() {
-    int i, j, k, t, greater, has;
+    int i, j, k, t, has;
     
-    for (i = 0; i < 100000; ++i) {
+    has = 0;
+    for (i = 0; i < MAXN; ++i) {
     
         if (count[i] == 0) {
             break;
         }
         
-        for (j = i + 1; j < 100000; ++j) {
+        for (j = i + 1; j < MAXN; ++j) {
         
             if (count[j] == 0) {
                 break;
@@ -72,46 +79,22 @@ void output() {
             if (count[j] == 1) {
                 continue;
             }
-                        
-            greater = 1;
-            for (k = 0; k < 7; ++k) {
-                if (number[i][k] < number[j][k]) {
-                    greater = 0;
-                    break;
-                } else if (number[i][k] > number[j][k]) {
-                    break;
-                }
-            }
             
-            if (greater) {
-                for (k = 0; k < 7; ++k) {
-                    t = number[i][k];
-                    number[i][k] = number[j][k];
-                    number[j][k] = t;
-                }
+            if (number[i] > number[j]) {
+                t = number[i];
+                number[i] = number[j];
+                number[j] = t;
+                
                 t = count[i];
                 count[i] = count[j];
                 count[j] = t;
             }
         }
-    
-    }
-    
-    has = 0;
-    for (i = 0; i < 100000; ++i) {
-    
-        if (count[i] <= 1) {
-            break;
+        
+        if (count[i] > 1) {
+            printf("%03d-%04d %d\n", number[i] / 10000, number[i] % 10000, count[i]);
+            has = 1;
         }
-                
-        for (k = 0; k < 7; ++k) {
-            if (k == 3) {
-                printf("-");
-            }
-            printf("%d", number[i][k]);
-        }
-        printf(" %d\n", count[i]);
-        has = 1;
     }
     
     if (!has) {
@@ -123,7 +106,7 @@ void output() {
 int main() {
 
     int n, i;
-    char s[100];
+    char s[MAXS];
     scanf("%d", &n);
     for (i = 0; i < n; ++i) {
         scanf("%s", s);
